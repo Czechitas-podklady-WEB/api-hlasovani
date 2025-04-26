@@ -10,214 +10,76 @@ servers:
   - url: https://hlasovani.czechitas.dev/api/
   - url: http://localhost:8000/api/
 paths:
-  /:
-    get:
-      summary: Načte nákupní seznam uživatele na celý týden.
-      responses:
-        '200':
-          description: Nákupní seznam na celý týden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Week'
-        '401':
-          description: Uživatel nebyl autorizován.
-  /{day}:
+  /poll/{pollId}:
     parameters:
-      - name: day
-        in: path
-        description: Zvolený den v týdnu.
-        required: true
-        schema:
-          type: string
-          enum:
-            - mon
-            - tue
-            - wed
-            - thu
-            - fri
-            - sat
-            - sun
+    - name: pollId
+      in: path
+      description: Identifikátor zvolené ankety.
+      required: true
+      schema:
+        type: number
     get:
-      summary: Načte nákupní seznam uživatele na zadaný den.
+      summary: Načte výsledky jedné konkrétní ankety.
       responses:
         '200':
-          description: Nákupní seznam na jeden den.
+          description: Výsledky zvolené ankety.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Day'
-        '400':
-          description: Chybná data.
-    delete:
-      summary: Smaže všechny položky nákupního seznamu uživatele na zadaný den.
-      responses:
-        '204':
-          description: Nákupní seznam pro zadaný den byl smazán.
-        '400':
-          description: Chybná data.
+                $ref: '#/components/schemas/Poll'
+        '404':
+          description: Anketa s uvedeným identifikátorem neexistuje.
     post:
-      summary: Přidá položku do nákupního seznamu na daný den.
+      summary: Odešle hlas do dané ankety.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Item"
+              $ref: "#/components/schemas/Vote"
       responses:
         '201':
-          description: Nově přidaná položka nákupního seznamu.
+          description: Hlas v anketě byl zaznamenán.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ItemFull'
-        '400':
-          description: Chybná data.
-  /{day}/{id}:
-    parameters:
-      - name: day
-        in: path
-        description: Zvolený den v týdnu.
-        required: true
-        schema:
-          type: string
-          enum:
-            - mon
-            - tue
-            - wed
-            - thu
-            - fri
-            - sat
-            - sun
-      - name: id
-        in: path
-        description: Identifikátor položky seznamu.
-        required: true
-        schema:
-          type: string
-    get:
-      summary: Načte položku nákupního seznamu uživatele pro zadaný den určenou ID.
-      responses:
-        '200':
-          description: Položka nákupního seznamu.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ItemFull'
+                $ref: '#/components/schemas/VoteFull'
         '400':
           description: Chybná data.
         '404':
-          description: Položka s daným ID v zadaném dni neexistuje.
-    put:
-      summary: Aktualizuje položku nákupního seznamu uživatele pro zadaný den určenou ID. Kompletně nahradí položku novou hodnotou.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Item"
-      responses:
-        '200':
-          description: Upravená položka nákupního seznamu.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ItemFull'
-        '400':
-          description: Chybná data.
-        '404':
-          description: Položka s daným ID v zadaném dni neexistuje.
-    patch:
-      summary: Aktualizuje položku nákupního seznamu uživatele pro zadaný den určenou ID. Pouze upraví hodnoty předané v těle požadavku.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ItemOptional"
-      responses:
-        '200':
-          description: Celá upravená položka nákupního seznamu.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ItemFull'
-        '400':
-          description: Chybná data.
-        '404':
-          description: Položka s daným ID v zadaném dni neexistuje.
-    delete:
-      summary: Smaže položku nákupního seznamu uživatele pro zadaný den určenou ID.
-      responses:
-        '204':
-          description: Položka byla smazána.
-        '400':
-          description: Chybná data.
-        '404':
-          description: Položka s daným ID v zadaném dni neexistuje.
+          description: Anketa s daným ID neexistuje.
 components:
   schemas:
-    Item:
+    Poll:
+      type: array
+      items:
+        $ref: '#/components/schemas/PollItem'
+    PollItem:
       type: object
       properties:
-        product:
+        option:
           type: string
-        amount:
-          type: number
-        unit:
-          type: string
-        done:
-          type: boolean
+        voters:
+          type: array
+          items:
+            type: string
       required:
-        - product
-        - amount
-    ItemFull:
+        - option
+        - voters
+    Vote:
+      type: object
+      properties:
+        name:
+          type: string
+        option:
+          type: number
+      required:
+        - name
+        - option
+    VoteFull:
+      $ref: '#/components/schemas/Vote'
       type: object
       properties:
         id:
           type: string
-        product:
-          type: string
-        amount:
-          type: number
-        unit:
-          type: string
-        done:
-          type: boolean
       required:
         - id
-        - product
-        - amount
-        - done
-    ItemOptional:
-      type: object
-      properties:
-        product:
-          type: string
-        amount:
-          type: number
-        unit:
-          type: string
-        done:
-          type: boolean
-    Day:
-      type: array
-      items:
-        $ref: '#/components/schemas/ItemFull'
-    Week:
-      type: array
-      items:
-        type: object
-        properties:
-          day:
-            type: string
-            enum:
-              - mon
-              - tue
-              - wed
-              - thu
-              - fri
-              - sat
-              - sun
-          items:
-            $ref: '#/components/schemas/Day'
-        required:
-          - day
-          - items
