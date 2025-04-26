@@ -16,7 +16,8 @@ type Poll = {
   options: Option[]
 }
 
-const kv = await Deno.openKv();
+const kv = await Deno.openKv("https://api.deno.com/databases/cc1a6f79-d47c-4568-8ebb-4d6dac4d6071/connect");
+//const kv = await Deno.openKv();
 
 export const dbList = async (poll: number): Promise<Option[]> => {
   const options = data[poll].options;
@@ -38,6 +39,12 @@ export const dbListAll = async (): Promise<Poll[]> => {
   }));
   const entries = kv.list<Vote>({ prefix: ["poll"] });
   for await (const entry of entries) {
+    if (result[entry.key[1]] == null) {
+      continue;
+    }
+    if (result[entry.key[1]].options[entry.key[2]] == null) {
+      continue;
+    }
     result[entry.key[1]].options[entry.key[2]].voters.push(entry.value);
   }
   return result;
