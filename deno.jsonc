@@ -1,0 +1,15 @@
+{
+  "tasks": {
+    "start": "deno serve --unstable-kv --allow-net --allow-read --allow-env src/main.tsx",
+    "dev": "deno serve --watch --unstable-kv --allow-net --allow-read --allow-env src/main.tsx"
+  },
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@^4.7.7",
+    "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.5.1",
+    "@std/ulid": "jsr:@std/ulid@^1.0.0"
+  },
+  "compilerOptions": {
+    "jsx": "precompile",
+    "jsxImportSource": "@hono/hono/jsx"
+  }
+}
