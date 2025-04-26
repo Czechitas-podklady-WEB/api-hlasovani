@@ -16,8 +16,7 @@ type Poll = {
   options: Option[]
 }
 
-const kv = await Deno.openKv("https://api.deno.com/databases/cc1a6f79-d47c-4568-8ebb-4d6dac4d6071/connect");
-//const kv = await Deno.openKv();
+const kv = await Deno.openKv();
 
 export const dbList = async (poll: number): Promise<Option[]> => {
   const options = data[poll].options;
