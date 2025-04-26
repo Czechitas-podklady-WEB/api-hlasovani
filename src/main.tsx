@@ -25,9 +25,9 @@ api.delete("/POLL-ALL", async (c) => {
   return c.body(null);
 });
 
-const Option = ({ option, voters, totalVoters }) => (
+const Option = ({ id, option, voters, totalVoters }) => (
   <div className="option">
-    <div className="option__text">{option} ({voters.length})</div>
+    <div className="option__text">{option} ({voters.length}) [id={id}]</div>
     <progress className="option__bar" max={totalVoters} value={voters.length}>
       {voters.length}
     </progress>
@@ -39,17 +39,19 @@ const Option = ({ option, voters, totalVoters }) => (
   </div>
 );
 
-const Poll = ({ question, options }) => {
+const Poll = ({ id, question, options }) => {
   const totalVoters = options.reduce(
     (accumulator, currentValue) => accumulator + currentValue.voters.length,
     0
   );
   return (
     <>
-      <h2>{question}</h2>
+      <h2>{question} [id={id}]</h2>
       <div class="options">
-        {options.map((option) => (
+        {options.map((option, index) => (
           <Option
+            key={index}
+            id={index}
             option={option.option}
             voters={option.voters}
             totalVoters={totalVoters}
@@ -72,8 +74,8 @@ const Page = ({ polls }) => (
     <body>
       <h1>Hlasování</h1>
       <div class="poll-links">
-        {polls.map((poll) => (
-          <Poll question={poll.question} options={poll.options} />
+        {polls.map((poll, index) => (
+          <Poll id={index} key={index} question={poll.question} options={poll.options} />
         ))}
       </div>
     </body>
